@@ -8,7 +8,7 @@ if [ ! -d "/var/lib/postgresql/13/main/" ]; then
     # Init the database
     /usr/lib/postgresql/13/bin/initdb -D /var/lib/postgresql/13/main/
 
-    #Start postgresql
+    #Start postgresql(autant que service)
     /etc/init.d/postgresql start
 
     # Enable the PostgreSQL public access

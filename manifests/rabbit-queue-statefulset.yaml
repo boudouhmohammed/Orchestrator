@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbit-queue
+spec:
+  replicas: 1
+  serviceName: rabbit-queue
+  selector:
+    matchLabels:
+      app: rabbit-queue
+  template:
+    metadata:
+      labels:
+        app: rabbit-queue
+    spec:
+      containers:
+      - name: rabbit-queue
+        image: mohaa04/rabbit-queue:latest
+        ports:
+          - name: rabbit-queue
+            containerPort: 5672
+        envFrom:
+          - secretRef:
+              name: rabbit-queue-secret
+        volumeMounts:
+          - name: billing-queue
+            mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+    - metadata: 
+        name: billing-queue
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi             
+                  
+                          

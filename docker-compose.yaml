@@ -1,26 +1,23 @@
 services:
   inventory-db:
-    container_name: inventory-db
-    build: 
+    build:
       context: srcs/postgres-db
     restart: always
-    env_file: .env
     volumes:
       - inventory-database:/var/lib/postgresql/data
     environment:
-      - DB_USER=${INVENTORY_DB_USER}
-      - DB_NAME=${INVENTORY_DB_NAME}
-      - DB_PASSWORD=${INVENTORY_DB_PASSWORD}
+      - POSTGRES_USER=${INVENTORY_DB_USER}
+      - POSTGRES_DB=${INVENTORY_DB_NAME}
+      - POSTGRES_PASSWORD=${INVENTORY_DB_PASSWORD}
     expose:
       - 5432
     healthcheck:
-      test: [ "CMD", "pg_isready" ]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 3s
       timeout: 1s
       retries: 5
 
   inventory-app:
-    container_name: inventory-app
     restart: always
     build:
       context: srcs/inventory-app
@@ -32,34 +29,31 @@ services:
         condition: service_healthy
 
   billing-db:
-    container_name: billing-db
-    build: 
+    build:
       context: srcs/postgres-db
     restart: always
     volumes:
       - billing-database:/var/lib/postgresql/data
     environment:
-      - DB_USER=${BILLING_DB_USER}
-      - DB_NAME=${BILLING_DB_NAME}
-      - DB_PASSWORD=${BILLING_DB_PASSWORD}
+      - POSTGRES_USER=${BILLING_DB_USER}
+      - POSTGRES_DB=${BILLING_DB_NAME}
+      - POSTGRES_PASSWORD=${BILLING_DB_PASSWORD}
     expose:
       - 5432
     healthcheck:
-      test: [ "CMD", "pg_isready" ]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 3s
       timeout: 1s
       retries: 5
 
   billing-queue:
-    container_name: billing-queue
     build:
       context: srcs/rabbitmq
     hostname: billing-queue
-    command: rabbitmq-server
     restart: always
     environment:
-      - RABBITMQ_USER=${RABBITMQ_USER} 
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} 
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
       - billing-queue:/var/lib/rabbitmq
     expose:
@@ -71,7 +65,6 @@ services:
       retries: 3
 
   billing-app:
-    container_name: billing-app
     build:
       context: srcs/billing-app
     env_file: .env
@@ -87,7 +80,6 @@ services:
         condition: service_healthy
 
   api-gateway:
-    container_name: api-gateway
     build:
       context: srcs/api-gateway-app
     restart: always
@@ -97,7 +89,7 @@ services:
       - INVENTORY_APP_HOST=inventory-app
       - BILLING_APP_HOST=billing-app
     ports:
-      - ${APIGATEWAY_PORT}:${APIGATEWAY_PORT}
+      - "3001:3000"
     depends_on:
       billing-queue:
         condition: service_healthy

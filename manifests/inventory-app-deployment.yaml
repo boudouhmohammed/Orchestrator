@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-app
+  template:
+    metadata:
+      labels:
+        app: inventory-app
+    spec:
+      containers:
+        - name: inventory-app
+          image: mohaa04/inventory-app:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: inventory-app-secret
+          env:
+            - name: INVENTORY_APP_PORT
+              value: "8080"
+          resources:
+            requests:
+              cpu: 100m                                                                    

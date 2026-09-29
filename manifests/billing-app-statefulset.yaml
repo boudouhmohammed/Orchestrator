@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: billing-app
+spec:
+  replicas: 1
+  serviceName: billing-app
+  selector:
+    matchLabels:
+      app: billing-app
+  template:
+    metadata:
+      labels:
+        app: billing-app
+    spec:
+      containers:
+        - name: billing-app
+          image: mohaa04/billing-app:latest
+          envFrom:
+            - secretRef:
+                name: billing-app-secret
+            - secretRef:
+                name: rabbit-queue-secret
+          env:  
+            - name: RABBITMQ_HOST
+              value: "rabbit-queue"
+            - name: RABBITMQ_PORT
+              value: "5672"
+                # Adresse et port de RabbitMQ pour que billing-app puisse lire les messages
+                # Ou avec le nom de la variable :
+                # Indique à billing-app où se connecter à RabbitMQ pour consommer les messages

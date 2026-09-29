@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway-app
+  template:
+    metadata:
+      labels:
+        app: api-gateway-app
+    spec:
+      containers:
+        - name: api-gateway-app
+          image: mohaa04/api-gateway-app:latest
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: rabbit-queue-secret
+          env:
+            - name: RABBITMQ_HOST
+              value: "rabbit-queue"
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: INVENTORY_APP_HOST
+              value: "inventory-app"
+            - name: INVENTORY_APP_PORT
+              value: "8080"
+            - name: APIGATEWAY_PORT
+              value: "3000"
+          resources:
+            requests:
+              cpu: 100m                                                                                                          
