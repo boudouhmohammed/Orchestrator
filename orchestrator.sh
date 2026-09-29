@@ -52,6 +52,9 @@ status_cluster(){
     vagrant status
     kubectl get nodes
 }
+deploy_apps() {
+    kubectl apply -f manifests/
+}
 case "$1" in
     create)
         create_vms
@@ -68,7 +71,10 @@ case "$1" in
     status)
         status_cluster
         ;;
+    deploy)
+        deploy_apps
+        ;;
     *)
-        echo "Usage: $0 {create|start|stop|destroy|status}"
+        echo "Usage: $0 {create|start|stop|destroy|status|deploy}"
         ;;
 esac
